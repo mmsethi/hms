@@ -1,0 +1,22 @@
+#account-form-container
+	form( method="post")#account-form.form-horizontal.well.span6
+		h1=today
+		p#sub1.subheading Please Fill Y.our expenses
+		hr
+		fieldset#hms
+			each k,i in accountsData1
+				#name-cg.control-group
+					.account-controls
+						input.btn.accounts-btn(type='text', value=k.name,name='button[]' )
+						input.input-amount(type='text', name='amount[]', value=k.amount,id='input-'+k.name )
+						//select#account-type(name='account-type[]')
+						//	option(selected=k.type == "default")= k.type
+						//	option(selected=k.type == "")= "NA"
+						label.checkbox Default
+						input(type='checkbox', name='checkbox[]', value=k.name ,checked=k.type).checkbox	
+						label.checkbox.delbtn Delete
+						input.btn.delbtn(type='button', value='X',name='button[]')
+			input.btn.accounts-btn.btn-primary(type='button', value='ADD NEW',id='addNew')
+			input.btn(type='button', value='Submit',id='submit-hms')
+			input.btn(type='hidden',value=user,name='user')
+			input(type='hidden', value=datestamp,name="datestamp")

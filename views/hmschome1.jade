@@ -1,0 +1,26 @@
+#account-form-container
+	h1
+	p#sub1.subheading Please Fill Y.our expenses
+	hr
+	div.wrapper
+		div.responsive-calendar
+			div.controls
+				a.pull-left(data-go="prev")
+					div.btn
+						i.icon-chevron-left
+				h4
+					span(data-head-year)
+					span(data-head-month)
+				a.pull-right(data-go="next")
+					div.btn
+						i.icon-chevron-right
+			hr
+			div.day-headers
+				div.day-header Mon
+				div.day-header Tue
+				div.day-header Wed
+				div.day-header Thu
+				div.day-header Fri
+				div.day-header Sat
+				div.day-header Sun
+			div.days(data-group="days")
