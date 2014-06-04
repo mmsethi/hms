@@ -176,3 +176,10 @@ button i {
   color: #f00;
   font-weight: bold;
 }
+.wrapper {
+  background-color: #fff;
+}
+.responsive-calendar .btn-primary {
+  min-width: 120px;
+  height: 26px;
+}

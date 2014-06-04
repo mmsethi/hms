@@ -8,14 +8,23 @@
 				#name-cg.control-group
 					.account-controls
 						input.btn.accounts-btn(type='text', value=k.name,name='button[]' )
-						input.input-amount(type='text', name='amount[]', value=k.amount,id='input-'+k.name )
+						input.input-amount(type='text', name='amount[]', value=k.amount,id='input-'+k.name,placeholder=0 )
 						//select#account-type(name='account-type[]')
 						//	option(selected=k.type == "default")= k.type
 						//	option(selected=k.type == "")= "NA"
 						label.checkbox Default
-						input(type='checkbox', name='checkbox[]', value=k.name ,checked=k.type).checkbox	
+						if k.type == 'false'
+							input(type='checkbox', name='checkbox[]', value='1' ,checked=false).checkbox
+						else
+							input(type='checkbox', name='checkbox[]', value='1' ,checked=true).checkbox
 						label.checkbox.delbtn Delete
-						input.btn.delbtn(type='button', value='X',name='button[]')
+						input.btn.delbtn(type='button', value='X',name='del[]')
+			div.control-group#alltotal
+				label.checkbox Total   
+					span Rs:
+						b 
+							span#totalAmount 0
+							span .00
 			input.btn.accounts-btn.btn-primary(type='button', value='ADD NEW',id='addNew')
 			input.btn(type='button', value='Submit',id='submit-hms')
 			input.btn(type='hidden',value=user,name='user')

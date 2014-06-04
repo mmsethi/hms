@@ -50,7 +50,7 @@ module.exports = function(app) {
 			// if user is not logged-in redirect back to login page //
 			res.redirect('/');
 		}   else{
-			res.render('home', {
+			res.render('myaccount', {
 				title : 'Control Panel',
 				countries : CT,
 				udata : req.session.user
@@ -201,11 +201,13 @@ module.exports = function(app) {
 			var accountsData=req.session;
 			var pagedatestamp = req.params.pagedatestamp;
 			var timeTitle=moment().calendar()+" "+moment().format("DD/MM/YYYY");
+			var userID=accountsData.user.user;
+			console.log("userid"+userID)
 			if(moment().format("DDMMYYYY")!=pagedatestamp){
 				timeTitle=moment(pagedatestamp,"DDMMYYYY").calendar()+" "+moment(pagedatestamp,"DDMMYYYY").format("DD/MM/YYYY");
 			}
-			AM.findAccountsByDate(pagedatestamp,function(error, result) {
-				console.log(pagedatestamp);
+			AM.findAccountsByDate(pagedatestamp,userID,function(error, result) {
+			//	console.log(pagedatestamp);
 				if(result.length>0){
 					res.render('hms', {
 						title : 'HMS Panel',
@@ -217,7 +219,7 @@ module.exports = function(app) {
 						user:accountsData.user.user
 					});
 				}else{
-					console.dir(accountsData.user.accounts);
+			//		console.dir(accountsData.user.accounts);
 					res.render('hms', {
 						title : 'HMS Panel',
 						udata : req.session.user,
@@ -260,55 +262,103 @@ module.exports = function(app) {
 	app.post('/hms/:pagedatestamp', function(req, res){
 		if (req.session.user == null){
 			// if user is not logged-in redirect back to login page //
-			res.redirect('/');
-		}else{		
-			var accountName= 	req.param('button');
-			var amount 	= 		req.param('amount');
-			var datestamp= 		req.param('datestamp');
-			var user= 		req.param('user');
-			var user= 		req.param('user');
-			var defaultAccount= '';
+			//console.log
+			
+			setTimeout(function(){console.log('going back ');res.redirect('/');}, 9000);
+			
+		}else{	
+			console.log("START");
 
-			if(req.param('checkbox')) defaultAccount =  req.param('checkbox');
-			var pagedatestamp = req.params.pagedatestamp;
-			if(moment().format("DDMMYYYY")==pagedatestamp){
-
-			}	
-			console.dir(defaultAccount);
-			console.dir(pagedatestamp);
-			//dummy data
-			//	var post=[{name:'name1',value:1},{name:'name2',value:2}];
-			var defaultAccounts=[];
-			var json=[];
-			for(var i=0;i<accountName.length;i++)
-			{
-				if(defaultAccount[i]!==undefined){
-					var defaultAccountsTemp={"name":accountName[i],"amount":0,'type':true};
-					defaultAccounts.push(defaultAccountsTemp);
-					defaultAccount[i]=true;
-				}else{
-					defaultAccount[i]=false;
+			try {
+				
+//				var accountName= 	req.param('button');
+//				var amount 	= 		req.param('amount');
+//				var datestamp= 		req.param('datestamp');
+//				var user= 		req.param('user');
+				var defaultAccount= [];
+				var accountName = req.body["button"]||req.param('button');
+				var amount = req.body["amount"]||req.param('amount');
+				var datestamp = req.body["datestamp"]||req.param('datestamp');
+				var user = req.body["user"]||req.param('user');
+				var defaultAccounts=[];
+				var json=[];
+				if(amount===undefined){
+					console.log('amount=undefined ');
 				}
-				if(amount[i]===undefined)amount[i]=0;
-				var temp={"name":accountName[i],"amount":Number(amount[i]),"datestamp":pagedatestamp,'type':defaultAccount[i]};
-				json.push(temp);
+				console.log("START");
+				console.dir(req.params);
+			/*	console.log("START");
+				console.log(req.body["button"]);
+				console.log(req.param('button'));
+				console.log(req.body["amount"]);
+				console.log(req.param('amount'));
+				console.log(req.body["datestamp"]);
+				console.log(req.param('datestamp'));
+				console.log(req.body["user"]);
+				console.log(req.param('user'));
+				console.log(req.body['checkbox']);
+				console.log(req.param('checkbox'));
+				
+				console.log(accountName);
+				console.log(amount);
+				console.log(datestamp);
+				console.log(user);
+
+				*/
+				
+				if(req.param('checkbox')) defaultAccount =  req.param('checkbox');
+				if(req.body['checkbox']) defaultAccount =  req.body['checkbox'];
+				defaultAccount.length=accountName.length;
+				var pagedatestamp = req.params.pagedatestamp;
+				//if(moment().format("DDMMYYYY")==pagedatestamp){}	
+				//console.dir
+				//console.dir(accountName);
+				//console.dir(amount);
+				console.log('accountName and accountName.length');
+				console.dir(accountName);
+				console.log(accountName.length);
+				for(var i=0;i<accountName.length;i++)
+				{
+				//	console.log(accountName.length);
+					if(defaultAccount[i]!==undefined){
+						var defaultAccountsTemp={"name":accountName[i],"amount":0,'type':'true'};
+						defaultAccounts.push(defaultAccountsTemp);
+						defaultAccount[i]='true';
+					}else{
+						defaultAccount[i]='false';
+					}
+					if(amount[i]===undefined)amount[i]=0;
+					
+					var temp={"name":accountName[i],"amount":amount[i],"datestamp":pagedatestamp,'type':defaultAccount[i],"user":user};
+					json.push(temp);
+				}
+
+				//var stringJson = JSON.stringify(json);
+				//console.dir
+				//console.dir(defaultAccount);
+				//console.dir(json );
+				AM.updateDefaultAccount (user,defaultAccounts);					
+				req.session.user.accounts=defaultAccounts;
+				AM.creatNewAccount (pagedatestamp,json,function(e, o){
+					if (e){
+						res.send('error-updating-account', 400);
+					}	else{
+						res.redirect('/hms');
+					}
+				});
 			}
+			catch (e) {
+				//console.dir
+			  console.log("entering catch block");
+			  console.log(e);
+			//  console.log("leaving catch block");
+			}
+			finally {
+				console.log("END");
 
-			//var stringJson = JSON.stringify(json);
-			console.dir(json );
-			//console.dir(req.session);
-			//		AM.updateDefaultAccount (id,defaultAccounts, function(e,defaultAccounts){});
-			AM.updateDefaultAccount (user,defaultAccounts);					
-			req.session.user.accounts=defaultAccounts;
-			AM.creatNewAccount (pagedatestamp,json,function(e, o){
-				if (e){
-					res.send('error-updating-account', 400);
-				}	else{
-					//req.session.user = o;
-
-					res.send('<textarea name="address" cols=30 rows=3></textarea>');
-				}
-			});
+				//console.dir
+			  //console.log("entering and leaving the finally block");
+			}
 		}	
 	});
 

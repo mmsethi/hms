@@ -10,7 +10,7 @@ var dbName 		= 'node-login';
 
 /* establish the database connection */
 
-var db = new MongoDB(dbName, new Server(dbHost, dbPort, {auto_reconnect: true}), {w: 0});
+var db = new MongoDB(dbName, new Server(dbHost, dbPort, {auto_reconnect: true}), {w: 1});
 db.open(function(e, d){
 	if (e) {
 		console.log(e);
@@ -20,9 +20,9 @@ db.open(function(e, d){
 });
 var users = db.collection('users');
 var accounts = db.collection('accounts');
-// users.insert(newData, {safe: true}, function(err,
-// records){console.log("Record added as "+records[0]._id);});
-// account.insert(defaultAccounts, {safe: true}, callback);
+//users.insert(newData, {safe: true}, function(err,
+//records){console.log("Record added as "+records[0]._id);});
+//account.insert(defaultAccounts, {safe: true}, callback);
 /*
  * var defaultAccounts={'accounts':[
  * {'name':'milk','amount':0,'type':"default",'date':''}
@@ -209,17 +209,17 @@ var findById = function(id, callback)
 
 var findByMultipleFields = function(a, callback)
 {
-// this takes an array of name/val pairs to search against {fieldName : 'value'}
-// //
+//	this takes an array of name/val pairs to search against {fieldName : 'value'}
+//	//
 	users.find( { $or : a } ).toArray(
 			function(e, results) {
 				if (e) callback(e)
 				else callback(null, results)
 			});
 }
-// getObjectId
+//getObjectId
 exports.getAllaccountsById=function(user,date,callback){
-// accounts.findOne({"userID":getObjectId(id)},
+//	accounts.findOne({"userID":getObjectId(id)},
 	accounts.findOne({"date":date,"user":user},
 			function(e, results) {
 		if (e) callback(e)
@@ -237,43 +237,61 @@ exports.updateAccount = function(id,newData, callback)
 exports.updateDefaultAccount = function(user,newData)
 {
 	// users.save({"user":user},{'accounts':newData});
-// users.update({"user":user}, {$unset :{'accounts':newData}});
-	users.update({"user":user}, {$set :{'accounts':newData}});
+//	users.update({"user":user}, {$unset :{'accounts':newData}});
+	users.update({"user":user}, {$set :{'accounts':newData}},function(err,rec){});
+	console.log("updateDefaultAccount");
+	console.dir(user);
+	console.dir(newData);
 }
 exports.creatNewAccount = function(datestamp,newData, callback) {
-	accounts.remove({
-		'datestamp' : datestamp
-	}, function(err) {
-		if (err) {
-		console.log(err)
-		} else {
-			accounts.save(newData, {
-				safe : true
-			}, function(error, res) {
-				if (error)
+	console.log("creatNewAccount");
+	console.dir(datestamp);
+	console.dir(newData);
+
+	
+	//	try {
+	accounts.remove({'datestamp': datestamp},function(err,numberOfRemovedDocs) {
+		if (err) {console.log(err)}else{
+		console.log(numberOfRemovedDocs);
+//			console.log("creatNewAccount accounts.save({'datestamp': '000'} ");
+			accounts.save(newData, {safe : true}, function(error, res) {
+				if (error){
+//					console.log("creatNewAccount save(newData, "+error);
 					callback(error, null);
-					else
-						callback(null, res);
+				}else{
+//					console.log("creatNewAccount save(newData,");
+					callback(null, res);
+				}
 			});
 		}
 	});
+//	}
+//	catch (e) {
+//		console.log("entering catch block");
+//		console.log(e);
+//		console.log("leaving catch block");
+//	}
+//	finally {
+//		console.log("entering and leaving the finally block");
+//	}
+
 
 }
 exports.sumAccount = function(callback)
 {
-// accounts.aggregate({$group:{ _id:"",accountst: {$sum: "$account"}}},
-// function(err, result){if(err){return console.dir(err);}else{return
-// console.log(result);}}
-// );
+//	accounts.aggregate({$group:{ _id:"",accountst: {$sum: "$account"}}},
+//	function(err, result){if(err){return console.dir(err);}else{return
+//	console.log(result);}}
+//	);
 	accounts.aggregate({$group: { _id: null,totalValue : {$sum:"$amount"}}}, 
 			function(err, result) {
 		if (err) callback (err, result)
 		else callback (err, result);
 	});
 }
-exports.findAccountsByDate = function(datestring,callback)
+exports.findAccountsByDate = function(datestring,user,callback)
 {
-	accounts.find({'datestamp':datestring}).toArray(function(err, o) {
+	accounts.find({'datestamp':datestring,'user':user}).toArray(function(err, o) {
 		if (err) {callback (err, null);}else{callback (null, o);}
 	});
 }

@@ -4,16 +4,16 @@ $(document).ready(function(){
 	function hmsController()
 	{
 
-	// bind event listeners to button clicks //
+		// bind event listeners to button clicks //
 		var that = this;
 
-	// handle user logout //
+		// handle user logout //
 		$('#btn-logout').click(function(){ that.attemptLogout(); });
 
-	// confirm account deletion //
+		// confirm account deletion //
 		$('#account-form-btn1').click(function(){$('.modal-confirm').modal('show')});
 
-	// handle account deletion //
+		// handle account deletion //
 		$('.modal-confirm .submit').click(function(){ that.deleteAccount(); });
 
 		this.deleteAccount = function()
@@ -25,7 +25,7 @@ $(document).ready(function(){
 				type: 'POST',
 				data: { id: $('#userId').val()},
 				success: function(data){
-		 			that.showLockedAlert('Your account has been deleted.<br>Redirecting you back to the homepage.');
+					that.showLockedAlert('Your account has been deleted.<br>Redirecting you back to the homepage.');
 				},
 				error: function(jqXHR){
 					console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
@@ -41,7 +41,7 @@ $(document).ready(function(){
 				type: "POST",
 				data: {logout : true},
 				success: function(data){
-		 			that.showLockedAlert('You are now logged out.<br>Redirecting you back to the homepage.');
+					that.showLockedAlert('You are now logged out.<br>Redirecting you back to the homepage.');
 				},
 				error: function(jqXHR){
 					console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
@@ -80,22 +80,67 @@ $(document).ready(function(){
 	$('#addNew').on('click',function(e){
 		var tt=jQuery( ".account-controls" ).length;
 		var ttnext=Number(tt+1);
-	//	alert(Number(tt+1));
+		//	alert(Number(tt+1));
 		//alert(tt.parent().html())
-		$('#addNew').before('<div class="control-group" id="name-cg">\
+		$('#alltotal').before('<div class="control-group" id="name-cg">\
 				<div class="account-controls">\
 				<input class="btn accounts-btn" type="text" name="button[]" value="">\
-		        <input name="amount[]" value="" class="input-amount" type="text">\
+				<input name="amount[]" value="" class="input-amount" type="text" placeholder=0>\
 				<label class="checkbox">Default</label>\
 				<input class="checkbox" type="checkbox"  value="1" name="checkbox[]">\
-		        </div></div>');
+				<label class="checkbox delbtn">Delete</label>\
+				<input type="button" class="btn delbtn" name="del[]" value="X">\
+		</div></div>');
 		jQuery('input[type="checkbox"]').checkbox();
-
-	})
-	jQuery('input[type="checkbox"]').checkbox();
-		
-		$('#submit-hms').on('click',function(){$('#account-form').submit()});
+		$('.delbtn').off();
+		$('.delbtn').on('click',function(e){
+			e.preventDefault();
+			$(this).parent().parent().remove();
+			addAll();
+		});
+		addAll();
 	});
 
-	
-	
+	function addAll(){
+		function validateNumber(n){
+			return n.replace(/[^\d,]+/g, '');
+		}
+
+		$('input.input-amount').off();
+		$('input.input-amount').on('change',function(){
+			var n=$(this).val();
+			var dd=validateNumber(n);
+			$(this).val(dd);
+			calcTotalPoints();
+		});
+		function calcTotalPoints(){
+			var totalPoints = 0;
+			$('.account-controls').each(function(){
+				$(this).find('input.input-amount').each(function(){
+					if($(this).val()==''){
+						//$(this).val(0);
+					}else{
+						//console.log(parseInt($(this).val()));
+						totalPoints += parseInt($(this).val()	);
+					}
+				});
+			}); 
+			$('#totalAmount').text(totalPoints); 
+		}
+		calcTotalPoints();
+
+	}
+
+
+
+	jQuery('input[type="checkbox"]').checkbox();
+	$('#submit-hms').on('click',function(){$('#account-form').submit()});
+	$('.delbtn').on('click',function(e){
+		e.preventDefault();
+		$(this).parent().parent().remove();
+		addAll();
+	});
+	addAll();
+});
+
+
